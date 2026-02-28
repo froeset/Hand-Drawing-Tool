@@ -32,6 +32,23 @@ def is_pinch(hand, threshold=0.1):
     distance = math.hypot(thumb_tip.x - index_tip.x, thumb_tip.y - index_tip.y)
     return distance < threshold
 
+def pinch_distance(hand):
+    thumb = hand[4]
+    index = hand[8]
+
+    # Convert normalized coords to pixel coords
+    x1 = int(thumb.x * frame_w)
+    y1 = int(thumb.y * frame_h)
+
+    x2 = int(index.x * frame_w)
+    y2 = int(index.y * frame_h)
+
+    # Euclidean distance
+    distance = math.hypot(x2 - x1, y2 - y1)
+
+    print("Distance (pixels):", distance)
+    return distance, x1, x2, y1, y2
+
 # -----------------------------
 # Model setup
 # -----------------------------
@@ -84,6 +101,9 @@ HAND_CONNECTIONS = [
     (0,17),(17,18),(18,19),(19,20)
 ]
 
+scale = 1.0
+previous_distance = None
+
 # -----------------------------
 # Main loop
 # -----------------------------
@@ -116,9 +136,12 @@ while True:
         # -----------------
         # Pan with pinch
         # -----------------
-        elif is_pinch(hand):
+        elif is_pinch(hand, threshold= 0.1):
             pinch_x = int(hand[8].x * frame_w)
             pinch_y = int(hand[8].y * frame_h)
+            cv2.putText(frame, "Pinching", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,255,0), 2)
+
+
             if pinch_start is None:
                 pinch_start = (pinch_x, pinch_y)
             else:
@@ -137,6 +160,20 @@ while True:
         else:
             prev_canvas_point = None
             pinch_start = None
+
+        distance, pinch_x1, pinch_x2, pinch_y1, pinch_y2 = pinch_distance(hand)
+
+        cv2.line(frame, (pinch_x1, pinch_y1), (pinch_x2, pinch_y2), (255, 255, 0), 10)
+
+        mid_x = (pinch_x1 + pinch_x2) // 2
+        mid_y = (pinch_y1 + pinch_y2) // 2
+
+        width_percent = (distance / 500) * 100
+
+        cv2.putText(frame, f"{int(width_percent)} %",
+            (mid_x, mid_y),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7, (0,255,255), 2)
 
         # -----------------
         # Draw hand landmarks on frame
