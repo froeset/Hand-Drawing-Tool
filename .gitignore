@@ -1,4 +1,32 @@
-venv310/
+# Python cache and compiled files
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv310/
+env/
+.venv/
+
+# MacOS system files
 .DS_Store
+
+# Logs
+*.log
+
+# PyCharm / VSCode project files
+.idea/
+.vscode/
+
+# Byte-compiled / temporary files
+*.swp
+*.swo
+
+# Mediapipe caches (if any)
+.mediapipe/
+
+# Output / temporary images
+*.png
+*.jpg
+*.jpeg
